@@ -1,0 +1,67 @@
+let perguntas = [
+    {
+        pergunta:"Qual o nome da nossa escola?",
+        respostas:["Luiz Eulalio de Bueno Vidigal Filho", "Nami Jafet", "Senai Osasco","Senai São Caetano"],
+        correta: 0 //Luiz Eulalio de Bueno Vidigal Filho
+    },
+    {
+        pergunta:"Qual o nome do diretor da escola?",
+        respostas:["Santos","Moraes","Sanches", "Willian"],
+        correta: 3 //Willian
+    },
+    {
+        pergunta:"Em que ano começou o primeiro técnico em Desenvolvimento de Sistemas?",
+        respostas:["2020","2021","2022", "2023"],
+        correta: 3 //2023
+    }
+]
+//Variáveis de controle
+let perguntaAtual = 0;
+// Qual pergunta esta sendo exibida
+// começa na posição 0, ou seja, a primeira pergunta do array
+let pontuacao = 0; // Quantas perguntas o usuário acertou
+
+function mostrarPergunta() {
+    let pergunta = perguntas[perguntaAtual];
+    //pega a pergunta atual dentro do array
+
+    document.getElementById("pergunta").innerText = pergunta.pergunta;
+
+    let respostasDiv = document.getElementById("respostas");
+    respostasDiv.innerHTML = ""
+    //limpa a div antes de adicionar novas respostas
+    pergunta.respostas.forEach(function(resposta, index) {
+        respostasDiv.innerHTML += `<button onclick="verificarResposta(${index})">${resposta}</button>`;
+})
+}
+function verificarResposta(index) {
+let pergunta = perguntas [perguntaAtual]
+
+let resultado = document.getElementById
+("resultado")
+if(index == pergunta.correta) {
+resultado. innerText = "Acertou"
+pontuacao++
+} else {
+resultado. innerText = "Errou"
+}
+}
+function proximaPergunta() {
+    perguntaAtual++;
+    // vai para a próxima pergunta
+    if(perguntaAtual < perguntas.length) {
+        mostrarPergunta();
+        document.getElementById("resultado").innerText = "";
+    } else {
+        mostrarResultadoFinal()
+  }
+}
+function mostrarResultadoFinal() {
+    document.getElementById("container").innerHTML = `
+    <h2>Quiz Finalizado!</h2>
+    <p>Sua pontuação: ${pontuacao} de ${perguntas.length}</p>
+    <button onclick="location.reload()">Jogar Novamente</button>
+    ` // acento agudo ao lado do P
+    //location.reload() recarrega a página para jogar novamente
+}
+mostrarPergunta()
