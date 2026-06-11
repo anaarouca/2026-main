@@ -1,0 +1,291 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* HEADER */
+.main-header {
+    background-color: #94857bc4;
+    height: 150px;
+    display: flex;
+    padding-top: 30px;
+    padding-left: 70px;
+    justify-content: flex-start;
+    
+}
+
+.logo{
+    width: 100px;
+    height: 85px;
+}
+
+ #pesquisa{ 
+    background-color: #e5e5e5;
+    color: #333;
+    width: 400px;
+    height: 30px;
+    margin-left: 1100px;
+    margin-top: 30px;
+    padding-left: 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+.icone{
+    width: 20px;
+    height: 20px;
+    margin-left: 20px;
+    margin-top: 30px;
+    cursor: pointer;
+}
+.tituloContador{
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+    font-size: 30px;
+}
+
+#contador{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 50px;
+    font-size: 80px;
+}
+
+/* Galeria de Imagens */
+.carrossel {
+      width: 100vw;
+      overflow: hidden;
+      padding-top: 60px;
+    }
+
+    .container {
+      display: flex;
+      transition: transform 0.5s;
+    }
+
+    .container img {
+      width: 400px;
+      height: 600px;
+    }
+
+
+    /* CADASTRO */
+    .bannerContainer{
+    display: flex;
+    justify-content: center;
+    }
+    .cadastro {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .tituloCadastro{
+        display: flex;
+        justify-content: center;
+        margin-top: 50px;
+        
+
+}
+
+    .input-cadastro {
+        width: 300px;
+        height: 40px;
+        margin-bottom: 10px;
+        padding-left: 10px;
+        border-radius: 5px;
+        border: solid 1px #94857bc4;
+    }
+
+    .btn-cadastro {
+        width: 200px;
+        height: 40px;
+        background-color: #94857bc4;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    /* acessórios */
+.secao-produtos {
+  padding: 40px 20px;
+  background-color: #f9f9f9;
+  
+}
+
+.titulo-secao {
+  text-align: center;
+  font-size: 30px;
+  color: #000000; 
+  margin-bottom: 40px;
+
+}
+
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+
+.card-geek {
+  display: flex;
+  background: #ffffff;
+  border: 1px solid #000000; 
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 550px; 
+  height: 400px;
+}
+
+
+/* Bloco da Imagem */
+.card-imagem {
+  width: 45%; 
+  height: 100%;
+  border-right: 1px solid #000000;
+}
+
+.card-imagem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; 
+}
+
+/* Bloco do Conteúdo - Texto e Botão */
+.card-conteudo {
+  width: 55%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
+  background-color: #fffbfa;
+}
+
+.card-conteudo h3 {
+  font-size: 20px;
+  color: #151515;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.card-conteudo p {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Fonte limpa para leitura */
+  font-size: 0.95rem;
+  color: #333;
+  line-height: 1.4;
+  margin-bottom: 20px;
+}
+
+/* Botão VER MAIS */
+.btn-card {
+  display: inline-block;
+  text-align: center;
+  background-color: #94857bc4; 
+  color: #ffffff;
+  padding: 10px 15px;
+  text-decoration: none;
+  border: 1px solid #000;
+  border-radius: 6px;
+}
+
+.btn-card:hover {
+  background-color: #625852ed;
+  transform: translate(1px, 1px);
+}
+
+/* FAQ */
+.tituloFaq{
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    font-size: 30px;
+}
+.faq{
+    padding: 40px 20px;
+    background-color: #ffffff;
+    display: flex;
+
+}
+.pergunta{
+    cursor: pointer;
+    margin: 20px 0;
+    padding-right: 20px;
+
+}
+.resposta{
+background-color: rgb(255, 255, 255);
+display: none;
+border-left: solid 1px #94857bc4;
+padding-left: 20px;
+
+}
+
+
+/* RODAPE */
+.rodape-comic {
+  background-color: #ffffff;
+  border-top: 1px solid #000000; 
+  padding: 40px 20px 10px 20px;
+  
+}
+
+
+.rodape-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  gap: 40px;
+  flex-wrap: wrap; /
+}
+
+
+.rodape-comic h3 {
+  font-size: 20px;
+  color: #151515;
+  margin-top: 0;
+  
+}
+
+
+.rodape-redes {
+  flex: 1;
+  min-width: 280px;
+}
+
+.rodape-redes p {
+  color: #555;
+  font-size: 15px;
+  
+}
+.rodape-endereco {
+  flex: 1;
+  min-width: 320px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  justify-content: flex-end;
+}
+
+.texto-endereco p {
+  margin: 4px 0;
+  color: #333;
+  font-size: 0.95rem;
+  
+}
+
+
