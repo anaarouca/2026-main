@@ -1,0 +1,61 @@
+//server. js
+//importando as bibliotecas
+const express = require("express")
+const mysql = require("mysql2")
+const cors = require("cors")
+
+//cria o servidor usando o express
+const app = express()
+
+//ativar o cors no projeto
+app.use(cors())
+
+//permite que os dados recebam json
+// {palavra: "maçã"}
+app.use(express.json())
+
+//procura pelo index.html dentro da pasta public
+app.use(express.static("public"))
+
+
+//conexão mysql
+const conexao = mysql.createConnection({
+    host: "localhost", //endereço
+    user: "root", //usuário
+    password: "senai", //senha
+    database: "palavras" //base de dados
+})
+
+//Testar a conexão
+conexao.connect((erro) => {
+    if (erro) {
+        console.log("Erro na conexão MysQL")
+    } else {
+        console.log("Conectado ao MysQL")
+    }
+})
+
+//cria um POST chamada /salvar, ela vai salvar no banco
+app.post("/salvar", (req, res) => {
+    const palavra = req.body.palavra
+    //Pega a palavra enviada pelo js(front-end)
+//req.body = dados enviados
+//palavra = nome da propriedade
+
+
+//comando sql para inserir dados
+const sql = "INSERT INTO palavra (texto) VALUES (?)"
+//a ? vai ser trocada pela palavra digitada
+
+// executar o comando sql
+conexao.query(sql, [palavra], (erro) => {
+    if (erro) {
+        res.send("Erro no insert")
+    } else {
+        res.send("Palavra salva!")
+    }
+})
+})
+app.listen(3000, () => {
+    console.log("Servidor funcionando")
+})
