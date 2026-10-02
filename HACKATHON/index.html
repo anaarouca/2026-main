@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-[#050a30]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MODO ON</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: '#050a30',
+                            accent: '#ff914d',
+                            accentHover: '#e07d3b',
+                            card: '#0e1c42',
+                            surface: '#142554',
+                            border: '#1d336f',
+                            textPrimary: '#f8fafc',
+                            textMuted: '#94a3b8'
+                        },
+                        status: {
+                            green: '#22c55e',
+                            yellow: '#f59e0b',
+                            red: '#ef4444'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- FontAwesome & Chart.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #050a30;
+            color: #f8fafc;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050a30;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1d336f;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff914d;
+        }
+
+        .gradient-accent {
+            background: linear-gradient(135deg, #ff914d 0%, #ff6b1a 100%);
+        }
+        
+        .pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col md:flex-row overflow-hidden bg-[#050a30] text-[#f8fafc]">
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="hidden md:flex flex-col w-64 bg-[#0e1c42] border-r border-[#1d336f] justify-between p-4 z-20">
+        <div>
+            <!-- Brand Logo -->
+            <div class="-mx-4 flex items-center justify-center px-0 py-5 mb-6 border-b border-[#1d336f]">
+                <img src="imgs/logo.png" alt="Logo HACKTOON" class="w-5/6 h-24 object-contain">
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="space-y-2">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-medium hover:bg-[#ebe8e0] text-[#c2410c] bg-[#ffeadb]">
+                    <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard & Insights
+                </button>
+                <button onclick="switchTab('workout')" id="nav-workout" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-medium hover:bg-[#ebe8e0] text-[#475569]">
+                    <i class="fa-solid fa-dumbbell w-5 text-center"></i> Módulo Treino
+                </button>
+                <button onclick="switchTab('diet')" id="nav-diet" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-medium hover:bg-[#ebe8e0] text-[#475569]">
+                    <i class="fa-solid fa-utensils w-5 text-center"></i> Módulo Dieta
+                </button>
+                <button onclick="switchTab('profile')" id="nav-profile" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-medium hover:bg-[#ebe8e0] text-[#475569]">
+                    <i class="fa-solid fa-user w-5 text-center"></i> Perfil & Evolução
+                </button>
+                <button onclick="switchTab('aicoach')" id="nav-aicoach" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-medium hover:bg-[#ebe8e0] text-[#475569] relative">
+                    <i class="fa-solid fa-robot w-5 text-center text-[#ff914d]"></i> FitBot
+                    <span class="absolute right-3 w-2 h-2 rounded-full bg-[#ff914d] pulse-slow"></span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- User Quick Info -->
+        <div>
+            <div id="sidebar-user-summary" class="p-3 bg-[#ebe8e0] rounded-xl border border-[#e2e8f0] flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#ff914d]/20 text-[#ff914d] flex items-center justify-center font-bold text-lg">
+                    <i class="fa-solid fa-user-ninja"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <p id="sidebar-peso-atual" class="text-sm font-bold text-[#172554] truncate">-- kg</p>
+                    <p id="sidebar-meta-calorica" class="text-xs text-[#64748b] truncate">Meta: -- kcal</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MOBILE NAVIGATION (Bottom Bar) -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-[#0e1c42] border-t border-[#1d336f] flex justify-around p-2 z-30">
+        <button onclick="switchTab('dashboard')" id="mobile-nav-dashboard" class="mobile-nav-item flex flex-col items-center p-2 text-[#ff914d]">
+            <i class="fa-solid fa-chart-pie text-lg"></i>
+            <span class="text-[10px] mt-1">Dashboard</span>
+        </button>
+        <button onclick="switchTab('workout')" id="mobile-nav-workout" class="mobile-nav-item flex flex-col items-center p-2 text-[#94a3b8]">
+            <i class="fa-solid fa-dumbbell text-lg"></i>
+            <span class="text-[10px] mt-1">Treino</span>
+        </button>
+        <button onclick="switchTab('diet')" id="mobile-nav-diet" class="mobile-nav-item flex flex-col items-center p-2 text-[#94a3b8]">
+            <i class="fa-solid fa-utensils text-lg"></i>
+            <span class="text-[10px] mt-1">Dieta</span>
+        </button>
+        <button onclick="switchTab('profile')" id="mobile-nav-profile" class="mobile-nav-item flex flex-col items-center p-2 text-[#94a3b8]">
+            <i class="fa-solid fa-user text-lg"></i>
+            <span class="text-[10px] mt-1">Perfil</span>
+        </button>
+        <button onclick="switchTab('aicoach')" id="mobile-nav-aicoach" class="mobile-nav-item flex flex-col items-center p-2 text-[#94a3b8]">
+            <i class="fa-solid fa-robot text-lg text-[#ff914d]"></i>
+            <span class="text-[10px] mt-1">FitBot</span>
+        </button>
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 flex flex-col h-full overflow-y-auto pb-20 md:pb-6 relative">
+        <!-- HEADER -->
+        <header class="bg-[#0e1c42]/80 backdrop-blur border-b border-[#1d336f] px-6 py-4 sticky top-0 z-10 flex justify-between items-center">
+            <div>
+                <h2 id="page-title" class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-[#ff914d]"></i> Dashboard & Insights
+                </h2>
+                <p id="page-subtitle" class="text-xs text-[#94a3b8]">Cruzamento inteligente entre treino e alimentação em tempo real</p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+            <button onclick="openQuickActionModal()" class="gradient-accent text-white font-semibold text-xs md:text-sm px-4 py-2 rounded-xl shadow-lg hover:opacity-90 transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Registo Rápido</span>
+            </button>
+            </div>
+        </header>
+
+        <!-- CONTENT VIEWS -->
+        <div class="p-4 md:p-6 space-y-6 flex-1">
+
+            <!-- VIEW 1: DASHBOARD & INSIGHTS -->
+            <section id="view-dashboard" class="view-content space-y-6">
+                <!-- Caloric Balance Banner -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Daily Balance Ring/Card -->
+                    <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-base flex items-center gap-2">
+                                <i class="fa-solid fa-fire text-[#ff914d]"></i> Balanço Calórico Hoje
+                            </h3>
+                            <span id="dash-date-badge" class="text-xs bg-[#142554] text-[#94a3b8] px-2.5 py-1 rounded-full border border-[#1d336f]">Hoje</span>
+                        </div>
+
+                        <div class="flex items-center justify-around my-2">
+                            <div class="text-center">
+                                <p class="text-xs text-[#94a3b8]">Ingeridas</p>
+                                <p id="dash-cal-consumed" class="text-xl font-extrabold text-emerald-400">0 <span class="text-xs font-normal text-[#94a3b8]">kcal</span></p>
+                            </div>
+                            <div class="text-2xl font-black text-[#1d336f]">-</div>
+                            <div class="text-center">
+                                <p class="text-xs text-[#94a3b8]">Gasto Treino</p>
+                                <p id="dash-cal-burned" class="text-xl font-extrabold text-[#ff914d]">0 <span class="text-xs font-normal text-[#94a3b8]">kcal</span></p>
+                            </div>
+                            <div class="text-2xl font-black text-[#1d336f]">=</div>
+                            <div class="text-center">
+                                <p class="text-xs text-[#94a3b8]">Saldo Líquido</p>
+                                <p id="dash-cal-net" class="text-xl font-extrabold text-white">0 <span class="text-xs font-normal text-[#94a3b8]">kcal</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="mt-4 space-y-1.5">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-[#94a3b8]">Progresso vs Meta (<span id="dash-cal-target">0</span> kcal)</span>
+                                <span id="dash-cal-percent" class="font-bold text-[#ff914d]">0%</span>
+                            </div>
+                            <div class="w-full h-3 bg-[#142554] rounded-full overflow-hidden border border-[#1d336f]">
+                                <div id="dash-cal-bar" class="h-full bg-gradient-to-r from-emerald-500 via-[#ff914d] to-rose-500 w-0 transition-all duration-500"></div>
+                            </div>
+                            <p id="dash-cal-status" class="text-[11px] text-[#94a3b8] text-right">Calculando...</p>
+                        </div>
+                    </div>
+
+                    <!-- INSIGHTS PANEL (Crucial Challenge Point) -->
+                    <div class="lg:col-span-2 bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <h3 class="font-bold text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-brain text-[#ff914d]"></i> Painel de Insights Inteligentes
+                                </h3>
+                                <p class="text-xs text-[#94a3b8]">Cruzamento automatizado de dados entre Treino e Dieta</p>
+                            </div>
+                            <span class="text-xs bg-[#ff914d]/10 text-[#ff914d] border border-[#ff914d]/30 px-3 py-1 rounded-full font-semibold">Motor Dinâmico</span>
+                        </div>
+
+                        <div id="insights-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 my-2">
+                            <!-- Dynamic Insight Cards inserted via JS -->
+                        </div>
+
+                        <div class="mt-2 pt-3 border-t border-[#1d336f] flex justify-between items-center text-xs text-[#94a3b8]">
+                            <span><i class="fa-solid fa-arrows-rotate mr-1"></i> Atualizado a cada novo registro</span>
+                            <button onclick="switchTab('aicoach')" class="text-[#ff914d] font-semibold hover:underline flex items-center gap-1">
+                                Ver análise completa no FitBot <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Chart 1: Calories Consumed vs Target -->
+                    <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl">
+                        <h3 class="font-bold text-sm mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-column text-[#ff914d]"></i> Calorias Consumidas vs. Meta
+                        </h3>
+                        <p class="text-xs text-[#94a3b8] mb-4">Histórico dos últimos 7 dias registrados</p>
+                        <div class="h-64 relative">
+                            <canvas id="chart-diet-summary"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Total Workout Volume -->
+                    <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl">
+                        <h3 class="font-bold text-sm mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-[#ff914d]"></i> Volume Semanal de Treino (kg)
+                        </h3>
+                        <p class="text-xs text-[#94a3b8] mb-4">Métrica de Carga Total (Séries × Reps × Peso)</p>
+                        <div class="h-64 relative">
+                            <canvas id="chart-workout-summary"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 2: MÓDULO TREINO -->
+            <section id="view-workout" class="view-content hidden space-y-6">
+                <!-- Sub Tabs Navigation -->
+                <div class="flex border-b border-[#1d336f] space-x-4">
+                    <button onclick="switchWorkoutSubTab('log')" id="wtab-log" class="subtab-btn py-2 px-4 font-bold text-sm text-[#ff914d] border-b-2 border-[#ff914d]">
+                        <i class="fa-solid fa-pen-to-square mr-1"></i> Registrar Execução
+                    </button>
+                    <button onclick="switchWorkoutSubTab('exercises')" id="wtab-exercises" class="subtab-btn py-2 px-4 font-bold text-sm text-[#94a3b8] border-b-2 border-transparent hover:text-white">
+                        <i class="fa-solid fa-list-check mr-1"></i> Exercícios
+                    </button>
+                    <button onclick="switchWorkoutSubTab('progression')" id="wtab-progression" class="subtab-btn py-2 px-4 font-bold text-sm text-[#94a3b8] border-b-2 border-transparent hover:text-white">
+                        <i class="fa-solid fa-arrow-trend-up mr-1"></i> Progressão & Métrica
+                    </button>
+                </div>
+
+                <!-- SUBTAB 1: LOG WORKOUT EXECUTION -->
+                <div id="wsub-log" class="space-y-6">
+                    <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl">
+                        <h3 class="font-bold text-base mb-4 text-[#ff914d] flex items-center gap-2">
+                            <i class="fa-solid fa-plus-circle"></i> Novo Registro de Treino
+                        </h3>
+
+                        <form id="form-workout-log" onsubmit="handleWorkoutLogSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Data *</label>
+                                <input type="date" id="wlog-date" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Exercício *</label>
+                                <select id="wlog-exercise" required onchange="handleExerciseSelectChange(this)" class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                                    <!-- Options dynamic -->
+                                </select>
+                            </div>
+
+                            <!-- Conditional Fields based on Exercise Type -->
+                            <div id="field-strength-sets">
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Séries *</label>
+                                <input type="number" min="1" id="wlog-sets" placeholder="Ex: 4" class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+
+                            <div id="field-strength-reps">
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Repetições / Série *</label>
+                                <input type="number" min="1" id="wlog-reps" placeholder="Ex: 10" class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+
+                            <div id="field-strength-weight">
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Carga Total (kg) *</label>
+                                <input type="number" step="0.5" min="0" id="wlog-weight" placeholder="Ex: 60" class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+
+                            <div id="field-cardio-duration" class="hidden">
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Duração (minutos) *</label>
+                                <input type="number" min="1" id="wlog-duration" placeholder="Ex: 30" class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+
+                            <div id="field-cardio-distance" class="hidden">
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Distância (km)</label>
+                                <input type="number" step="0.1" min="0" id="wlog-distance" placeholder="Ex: 5.0" class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+
+                            <div class="md:col-span-2 lg:col-span-4 flex justify-end gap-2 mt-2">
+                                <button type="submit" class="gradient-accent text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-lg hover:opacity-90 transition">
+                                    <i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Execução
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- History Table -->
+                    <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl">
+                        <h3 class="font-bold text-base mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-[#ff914d]"></i> Histórico de Execuções
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-[#1d336f] text-xs text-[#94a3b8]">
+                                        <th class="p-3">Data</th>
+                                        <th class="p-3">Exercício</th>
+                                        <th class="p-3">Grupo</th>
+                                        <th class="p-3">Detalhes Execução</th>
+                                        <th class="p-3">Volume Total</th>
+                                        <th class="p-3">Status Progressão</th>
+                                        <th class="p-3 text-right">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-workout-logs-body" class="text-sm divide-y divide-[#1d336f]">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBTAB 2: EXERCISES DATABASE -->
+                <div id="wsub-exercises" class="hidden space-y-6">
+                    <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl">
+                        <h3 class="font-bold text-base mb-4 text-[#ff914d]">Cadastrar Novo Exercício</h3>
+                        <form id="form-add-exercise" onsubmit="handleAddExercise(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Nome do Exercício *</label>
+                                <input type="text" id="ex-name" required placeholder="Ex: Supino Reto" class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Grupo Muscular *</label>
+                                <select id="ex-group" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                                    <option value="Peito">Peito</option>
+                                    <option value="Costas">Costas</option>
+                                    <option value="Pernas">Pernas</option>
+                                    <option value="Ombros">Ombros</option>
+                                    <option value="Braços">Braços</option>
+                                    <option value="Core/Abdômen">Core/Abdômen</option>
+                                    <option value="Cardio">Cardio / Aeróbico</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Tipo *</label>
+                                <select id="ex-type" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                                    <option value="Força">Força (Carga/Reps/Séries)</option>
+                                    <option value="Cardio">Cardio (Duração/Distância)</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-3 flex justify-end">
+                                <button type="submit" class="gradient-accent text-white font-bold text-sm px-6 py-2 rounded-xl shadow-lg hover:opacity-90 transition">
+                                    Adicionar à Base
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Exercise Database List -->
+                    <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl">
+                        <h3 class="font-bold text-base mb-4">Exercícios Cadastrados</h3>
+                        <div id="exercise-list-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <!-- Dynamic exercise cards -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBTAB 3: PROGRESSION ANALYTICS -->
+                <div id="wsub-progression" class="hidden space-y-6">
+                    <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                            <div>
+                                <h3 class="font-bold text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-chart-line text-[#ff914d]"></i> Evolução por Exercício (Cálculo 4.1)
+                                </h3>
+                                <p class="text-xs text-[#94a3b8]">Volume Calculado = (Séries × Reps × Carga) ou Métrica Equivalente Cardio</p>
+                            </div>
+                            <select id="progression-exercise-filter" onchange="updateExerciseProgressionChart()" class="bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                                <!-- Options dynamically inserted -->
+                            </select>
+                        </div>
+
+                        <!-- Status Alert Banner for selected Exercise -->
+                        <div id="progression-status-banner" class="p-4 rounded-xl border mb-4 flex items-center gap-3">
+                            <!-- Dynamic status info -->
+                        </div>
+
+                        <div class="h-72 relative">
+                            <canvas id="chart-exercise-progression"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 3: MÓDULO DIETA -->
+            <section id="view-diet" class="view-content hidden space-y-6">
+                <!-- Sub Tabs Navigation -->
+                <div class="flex border-b border-[#1d336f] space-x-4">
+                    <button onclick="switchDietSubTab('meals')" id="dtab-meals" class="subtab-btn py-2 px-4 font-bold text-sm text-[#ff914d] border-b-2 border-[#ff914d]">
+                        <i class="fa-solid fa-utensils mr-1"></i> Diário de Refeições
+                    </button>
+                    <button onclick="switchDietSubTab('foods')" id="dtab-foods" class="subtab-btn py-2 px-4 font-bold text-sm text-[#94a3b8] border-b-2 border-transparent hover:text-white">
+                        <i class="fa-solid fa-apple-whole mr-1"></i> Base de Alimentos
+                    </button>
+                </div>
+
+                <!-- SUBTAB 1: MEAL DIARY -->
+                <div id="dsub-meals" class="space-y-6">
+                    <!-- Date Selector and Daily Caloric Summary Card -->
+                    <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-calendar-day text-[#ff914d] text-xl"></i>
+                            <div>
+                                <label class="block text-xs text-[#94a3b8]">Data do Diário</label>
+                                <input type="date" id="diet-diary-date" onchange="renderDietDiary()" class="bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+                        </div>
+
+                        <!-- Macro Totals -->
+                        <div class="flex gap-4 text-center">
+                            <div class="px-3 py-1.5 bg-[#142554] rounded-xl border border-[#1d336f]">
+                                <span class="text-[10px] text-[#94a3b8] block">PROTEÍNAS</span>
+                                <span id="macro-prot" class="font-bold text-sm text-emerald-400">0g</span>
+                            </div>
+                            <div class="px-3 py-1.5 bg-[#142554] rounded-xl border border-[#1d336f]">
+                                <span class="text-[10px] text-[#94a3b8] block">CARBOS</span>
+                                <span id="macro-carb" class="font-bold text-sm text-sky-400">0g</span>
+                            </div>
+                            <div class="px-3 py-1.5 bg-[#142554] rounded-xl border border-[#1d336f]">
+                                <span class="text-[10px] text-[#94a3b8] block">GORDURAS</span>
+                                <span id="macro-gord" class="font-bold text-sm text-amber-400">0g</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Meal Log Form -->
+                    <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl">
+                        <h3 class="font-bold text-base mb-4 text-[#ff914d] flex items-center gap-2">
+                            <i class="fa-solid fa-[#050a30] fa-plus-circle"></i> Adicionar Alimento à Refeição
+                        </h3>
+                        <form id="form-diet-log" onsubmit="handleDietLogSubmit(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Refeição *</label>
+                                <select id="dlog-meal-type" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                                    <option value="Café da Manhã">Café da Manhã</option>
+                                    <option value="Almoço">Almoço</option>
+                                    <option value="Lanche">Lanche / Pré-Treino</option>
+                                    <option value="Jantar">Jantar</option>
+                                    <option value="Ceia">Ceia</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Alimento *</label>
+                                <select id="dlog-food" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                                    <!-- Dynamic food database options -->
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Quantidade Consumida (g/ml ou unid.) *</label>
+                                <input type="number" min="1" id="dlog-qty" placeholder="Ex: 150" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+                            <div class="flex items-end">
+                                <button type="submit" class="w-full gradient-accent text-white font-bold text-sm py-2 rounded-xl shadow-lg hover:opacity-90 transition">
+                                    Registrar Alimento
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Meals List by Category -->
+                    <div id="diet-meals-container" class="space-y-4">
+                        <!-- Dynamic meal blocks -->
+                    </div>
+                </div>
+
+                <!-- SUBTAB 2: FOOD DATABASE -->
+                <div id="dsub-foods" class="hidden space-y-6">
+                    <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl">
+                        <h3 class="font-bold text-base mb-4 text-[#ff914d]">Cadastrar Alimento na Tabela Nutricional</h3>
+                        <form id="form-add-food" onsubmit="handleAddFood(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <div class="lg:col-span-2">
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Nome do Alimento *</label>
+                                <input type="text" id="food-name" required placeholder="Ex: Peito de Frango Grelhado" class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Calorias (kcal/100g) *</label>
+                                <input type="number" min="0" id="food-cals" required placeholder="Ex: 165" class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Proteínas (g/100g)</label>
+                                <input type="number" step="0.1" min="0" id="food-prot" placeholder="Ex: 31" class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Carboidratos (g/100g)</label>
+                                <input type="number" step="0.1" min="0" id="food-carb" placeholder="Ex: 0" class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Gorduras (g/100g)</label>
+                                <input type="number" step="0.1" min="0" id="food-gord" placeholder="Ex: 3.6" class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+                            <div class="lg:col-span-5 flex justify-end">
+                                <button type="submit" class="gradient-accent text-white font-bold text-sm px-6 py-2 rounded-xl shadow-lg hover:opacity-90 transition">
+                                    Salvar na Tabela
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl">
+                        <h3 class="font-bold text-base mb-4">Tabela Nutricional Cadastrada</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-[#1d336f] text-xs text-[#94a3b8]">
+                                        <th class="p-3">Alimento</th>
+                                        <th class="p-3">Calorias (100g)</th>
+                                        <th class="p-3">Proteínas</th>
+                                        <th class="p-3">Carboidratos</th>
+                                        <th class="p-3">Gorduras</th>
+                                        <th class="p-3 text-right">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-food-db-body" class="text-sm divide-y divide-[#1d336f]">
+                                    <!-- Dynamic foods -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 4: PERFIL & EVOLUÇÃO CORPORAL -->
+            <section id="view-profile" class="view-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- User Goals Form -->
+                    <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl space-y-4">
+                        <h3 class="font-bold text-base text-[#ff914d] flex items-center gap-2">
+                            <i class="fa-solid fa-sliders"></i> Metas do Perfil
+                        </h3>
+
+                        <form id="form-user-profile" onsubmit="handleProfileSubmit(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Peso Atual (kg) *</label>
+                                <input type="number" step="0.1" min="1" id="prof-current-weight" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Meta de Peso (kg) *</label>
+                                <input type="number" step="0.1" min="1" id="prof-goal-weight" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-[#94a3b8] mb-1">Meta Calórica Diária (kcal) *</label>
+                                <input type="number" min="500" id="prof-cal-target" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            </div>
+
+                            <button type="submit" class="w-full gradient-accent text-white font-bold text-sm py-2.5 rounded-xl shadow-lg hover:opacity-90 transition">
+                                Salvar Configurações
+                            </button>
+                        </form>
+
+                        <!-- Log Weight Entry -->
+                        <div class="pt-4 border-t border-[#1d336f]">
+                            <h4 class="font-bold text-sm mb-3">Novo Registro de Peso</h4>
+                            <form id="form-add-weight" onsubmit="handleAddWeight(event)" class="space-y-3">
+                                <div>
+                                    <label class="block text-xs text-[#94a3b8] mb-1">Data *</label>
+                                    <input type="date" id="wrec-date" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-[#94a3b8] mb-1">Peso Medido (kg) *</label>
+                                    <input type="number" step="0.1" min="1" id="wrec-val" required placeholder="Ex: 77.8" class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                                </div>
+                                <button type="submit" class="w-full bg-[#142554] border border-[#1d336f] hover:border-[#ff914d] text-white font-semibold text-xs py-2 rounded-xl transition">
+                                    Registrar Medição
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Weight Chart and History -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl">
+                            <h3 class="font-bold text-base mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-weight-scale text-[#ff914d]"></i> Evolução do Peso Corporal vs. Meta
+                            </h3>
+                            <p class="text-xs text-[#94a3b8] mb-4">Acompanhamento contínuo da balança ao longo do tempo</p>
+                            <div class="h-64 relative">
+                                <canvas id="chart-weight-trend"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Weight History Table -->
+                        <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-5 shadow-xl">
+                            <h3 class="font-bold text-sm mb-3">Histórico de Medições de Peso</h3>
+                            <div class="overflow-x-auto max-h-48 overflow-y-auto">
+                                <table class="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                        <tr class="border-b border-[#1d336f] text-[#94a3b8]">
+                                            <th class="p-2">Data</th>
+                                            <th class="p-2">Peso (kg)</th>
+                                            <th class="p-2">Diferença vs Meta</th>
+                                            <th class="p-2 text-right">Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-weight-history" class="divide-y divide-[#1d336f]">
+                                        <!-- Dynamic entries -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 5: TREINADOR IA ASSISTANT -->
+            <section id="view-aicoach" class="view-content hidden h-full flex flex-col space-y-4">
+                <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-4 flex items-center gap-4 shadow-xl">
+                    <div class="w-12 h-12 rounded-2xl gradient-accent flex items-center justify-center text-white text-2xl shadow-lg font-bold">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-lg text-white">Personal FitBot</h3>
+                        <p class="text-xs text-[#94a3b8]">Assistente inteligente treinado nos seus dados reais do localStorage</p>
+                    </div>
+                </div>
+
+                <!-- Chat Box Container -->
+                <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-4 flex-1 flex flex-col justify-between shadow-xl min-h-[450px]">
+                    <div id="ai-chat-messages" class="flex-1 overflow-y-auto space-y-4 p-2 max-h-[380px]">
+                        <!-- Messages dynamic -->
+                    </div>
+
+                    <!-- Quick Prompt Suggestions -->
+                    <div class="pt-3 border-t border-[#1d336f] space-y-2">
+                        <p class="text-[11px] text-[#94a3b8] font-semibold">Ações Rápidas da IA:</p>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="triggerAiAction('workout_suggestion')" class="text-xs bg-[#142554] hover:bg-[#ff914d]/20 text-[#ff914d] border border-[#ff914d]/40 px-3 py-1.5 rounded-xl transition font-medium">
+                                ⚡ Sugerir Treino para Hoje
+                            </button>
+                            <button onclick="triggerAiAction('stagnation_advice')" class="text-xs bg-[#142554] hover:bg-[#ff914d]/20 text-[#ff914d] border border-[#ff914d]/40 px-3 py-1.5 rounded-xl transition font-medium">
+                                📈 Como Superar Estagnação?
+                            </button>
+                            <button onclick="triggerAiAction('diet_adjustment')" class="text-xs bg-[#142554] hover:bg-[#ff914d]/20 text-[#ff914d] border border-[#ff914d]/40 px-3 py-1.5 rounded-xl transition font-medium">
+                                🥗 Ajustar Dieta do Dia
+                            </button>
+                            <button onclick="triggerAiAction('full_analysis')" class="text-xs bg-[#142554] hover:bg-[#ff914d]/20 text-[#ff914d] border border-[#ff914d]/40 px-3 py-1.5 rounded-xl transition font-medium">
+                                🔍 Análise Geral Cruzada
+                            </button>
+                        </div>
+
+                        <!-- Chat Input -->
+                        <form onsubmit="handleAiChatSubmit(event)" class="flex gap-2 mt-2">
+                            <input type="text" id="ai-user-input" placeholder="Pergunte ao FitBot sobre treino ou alimentação..." class="flex-1 bg-[#142554] border border-[#1d336f] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                            <button type="submit" class="gradient-accent text-white px-5 py-2 rounded-xl text-sm font-bold shadow-lg hover:opacity-90 transition">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- QUICK ACTION MODAL -->
+    <div id="quick-action-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
+            <button onclick="closeQuickActionModal()" class="absolute top-4 right-4 text-[#94a3b8] hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-lg font-bold text-white mb-1">Registo Rápido</h3>
+            <p class="text-xs text-[#94a3b8] mb-4">Escolha a ação que deseja realizar agora</p>
+
+            <div class="space-y-3">
+                <button onclick="closeQuickActionModal(); switchTab('workout'); switchWorkoutSubTab('log')" class="w-full flex items-center gap-3 p-3 bg-[#142554] hover:border-[#ff914d] border border-[#1d336f] rounded-xl text-left transition">
+                    <div class="w-10 h-10 rounded-lg bg-[#ff914d]/20 text-[#ff914d] flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-dumbbell"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm">Registrar Treino Executado</p>
+                        <p class="text-xs text-[#94a3b8]">Adicionar séries, carga e repetições</p>
+                    </div>
+                </button>
+
+                <button onclick="closeQuickActionModal(); switchTab('diet'); switchDietSubTab('meals')" class="w-full flex items-center gap-3 p-3 bg-[#142554] hover:border-[#ff914d] border border-[#1d336f] rounded-xl text-left transition">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-utensils"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm">Registrar Refeição Consumida</p>
+                        <p class="text-xs text-[#94a3b8]">Lançar alimentos no diário do dia</p>
+                    </div>
+                </button>
+
+                <button onclick="closeQuickActionModal(); switchTab('profile')" class="w-full flex items-center gap-3 p-3 bg-[#142554] hover:border-[#ff914d] border border-[#1d336f] rounded-xl text-left transition">
+                    <div class="w-10 h-10 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-weight-scale"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm">Registrar Peso Corporal</p>
+                        <p class="text-xs text-[#94a3b8]">Atualizar medição da balança</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIRST VISIT SETUP -->
+    <div id="first-visit-modal" class="fixed inset-0 bg-[#050a30]/95 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-[#0e1c42] border border-[#1d336f] rounded-2xl w-full max-w-2xl p-6 my-auto shadow-2xl">
+            <div class="mb-5">
+                <p class="text-sm font-semibold text-[#ff914d] mb-1">Bem-vindo ao HACKTOON</p>
+                <h2 class="text-2xl font-bold text-white">Vamos configurar seu perfil</h2>
+                <p class="text-sm text-[#94a3b8] mt-2">Conte um pouco sobre você. Vamos usar essas informações para preencher seu perfil e estimar sua meta calórica diária.</p>
+            </div>
+
+            <form onsubmit="handleFirstVisitSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2">
+                    <label for="setup-name" class="block text-xs font-semibold text-[#94a3b8] mb-1">Como podemos te chamar? *</label>
+                    <input id="setup-name" type="text" maxlength="60" required autocomplete="name" class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                </div>
+                <div>
+                    <label for="setup-age" class="block text-xs font-semibold text-[#94a3b8] mb-1">Idade *</label>
+                    <input id="setup-age" type="number" min="14" max="100" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                </div>
+                <div>
+                    <label for="setup-sex" class="block text-xs font-semibold text-[#94a3b8] mb-1">Sexo usado no cálculo metabólico *</label>
+                    <select id="setup-sex" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                        <option value="">Selecione</option>
+                        <option value="female">Feminino</option>
+                        <option value="male">Masculino</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="setup-height" class="block text-xs font-semibold text-[#94a3b8] mb-1">Altura (cm) *</label>
+                    <input id="setup-height" type="number" min="100" max="250" step="0.1" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                </div>
+                <div>
+                    <label for="setup-current-weight" class="block text-xs font-semibold text-[#94a3b8] mb-1">Peso atual (kg) *</label>
+                    <input id="setup-current-weight" type="number" min="1" step="0.1" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                </div>
+                <div>
+                    <label for="setup-goal-weight" class="block text-xs font-semibold text-[#94a3b8] mb-1">Meta de peso (kg) *</label>
+                    <input id="setup-goal-weight" type="number" min="1" step="0.1" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                </div>
+                <div>
+                    <label for="setup-activity" class="block text-xs font-semibold text-[#94a3b8] mb-1">Nível de atividade *</label>
+                    <select id="setup-activity" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                        <option value="">Selecione</option>
+                        <option value="1.2">Pouco ativo (pouco ou nenhum exercício)</option>
+                        <option value="1.375">Levemente ativo (1–3 dias por semana)</option>
+                        <option value="1.55">Moderadamente ativo (3–5 dias por semana)</option>
+                        <option value="1.725">Muito ativo (6–7 dias por semana)</option>
+                        <option value="1.9">Extremamente ativo (treino intenso/trabalho físico)</option>
+                    </select>
+                </div>
+                <div class="sm:col-span-2">
+                    <label for="setup-objective" class="block text-xs font-semibold text-[#94a3b8] mb-1">Objetivo atual *</label>
+                    <select id="setup-objective" required class="w-full bg-[#142554] border border-[#1d336f] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#ff914d]">
+                        <option value="">Selecione</option>
+                        <option value="lose">Perder peso</option>
+                        <option value="maintain">Manter o peso</option>
+                        <option value="gain">Ganhar peso</option>
+                    </select>
+                </div>
+                <p class="sm:col-span-2 text-xs text-[#94a3b8]">A meta calórica é uma estimativa inicial baseada nas informações fornecidas e pode ser ajustada depois no perfil.</p>
+                <button type="submit" class="sm:col-span-2 w-full gradient-accent text-white font-bold text-sm py-3 rounded-xl shadow-lg hover:opacity-90 transition">
+                    Configurar meu perfil
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- UI TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <script>
+        // LOCAL STORAGE KEYS
+        const STORAGE_PROFILE = 'hacktoon_profile';
+        const STORAGE_ONBOARDING = 'hacktoon_onboarding_complete';
+        const STORAGE_EXERCISES = 'hacktoon_exercises';
+        const STORAGE_WORKOUT_LOGS = 'hacktoon_workout_logs';
+        const STORAGE_FOODS = 'hacktoon_foods';
+        const STORAGE_MEAL_LOGS = 'hacktoon_meal_logs';
+        const STORAGE_WEIGHT_LOGS = 'hacktoon_weight_logs';
+
+        function saveAppData(key, value) {
+            localStorage.setItem(key, value);
+        }
+
+        // Chart Instances
+        let chartDietSummaryInstance = null;
+        let chartWorkoutSummaryInstance = null;
+        let chartExerciseProgressionInstance = null;
+        let chartWeightTrendInstance = null;
+
+        // HELPER: Date Formatting & Validation
+        function getTodayDateStr() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        // INITIAL REFERENCE DATA
+        function initializeMockDataIfEmpty() {
+            if (!localStorage.getItem(STORAGE_EXERCISES)) {
+                const defaultExercises = [
+                    { id: 'ex_1', nome: 'Supino Reto com Barra', grupo: 'Peito', tipo: 'Força' },
+                    { id: 'ex_2', nome: 'Agachamento Livre', grupo: 'Pernas', tipo: 'Força' },
+                    { id: 'ex_3', nome: 'Puxada Frontal', grupo: 'Costas', tipo: 'Força' },
+                    { id: 'ex_4', nome: 'Desenvolvimento c/ Halteres', grupo: 'Ombros', tipo: 'Força' },
+                    { id: 'ex_5', nome: 'Corrida na Esteira', grupo: 'Cardio', tipo: 'Cardio' }
+                ];
+                localStorage.setItem(STORAGE_EXERCISES, JSON.stringify(defaultExercises));
+            }
+
+            if (!localStorage.getItem(STORAGE_FOODS)) {
+                const defaultFoods = [
+                    { id: 'fd_1', nome: 'Peito de Frango Grelhado', calorias100g: 165, prot: 31, carb: 0, gord: 3.6 },
+                    { id: 'fd_2', nome: 'Arroz Integral Cozido', calorias100g: 130, prot: 2.7, carb: 28, gord: 1 },
+                    { id: 'fd_3', nome: 'Ovo Cozido (Unidade ~50g)', calorias100g: 155, prot: 13, carb: 1.1, gord: 11 },
+                    { id: 'fd_4', nome: 'Banana Prata', calorias100g: 89, prot: 1.1, carb: 23, gord: 0.3 },
+                    { id: 'fd_5', nome: 'Whey Protein (Dose 30g)', calorias100g: 400, prot: 80, carb: 6, gord: 5 }
+                ];
+                localStorage.setItem(STORAGE_FOODS, JSON.stringify(defaultFoods));
+            }
+
+            removeLegacyDemoRecords();
+        }
+
+        function removeLegacyDemoRecords() {
+            const profile = JSON.parse(localStorage.getItem(STORAGE_PROFILE) || 'null');
+            const isDemoProfile = profile
+                && profile.pesoAtual === 78.5
+                && profile.metaPeso === 72
+                && profile.metaCalorias === 2200;
+
+            if (isDemoProfile) localStorage.removeItem(STORAGE_PROFILE);
+
+            const demoIds = {
+                [STORAGE_WORKOUT_LOGS]: new Set(['wl_1', 'wl_2', 'wl_3', 'wl_4', 'wl_5', 'wl_6']),
+                [STORAGE_MEAL_LOGS]: new Set(['ml_1', 'ml_2', 'ml_3', 'ml_4', 'ml_5']),
+                [STORAGE_WEIGHT_LOGS]: new Set(['wh_1', 'wh_2', 'wh_3', 'wh_4'])
+            };
+
+            Object.entries(demoIds).forEach(([storageKey, ids]) => {
+                const records = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                const remainingRecords = records.filter(record => !ids.has(record.id));
+                if (remainingRecords.length !== records.length) {
+                    localStorage.setItem(storageKey, JSON.stringify(remainingRecords));
+                }
+            });
+        }
+
+        function startFirstVisitSetup() {
+            if (localStorage.getItem(STORAGE_ONBOARDING) === 'true') return false;
+
+            const profile = JSON.parse(localStorage.getItem(STORAGE_PROFILE) || 'null');
+            if (profile) {
+                saveAppData(STORAGE_ONBOARDING, 'true');
+                return false;
+            }
+
+            document.getElementById('first-visit-modal').classList.remove('hidden');
+            return true;
+        }
+
+        function handleFirstVisitSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('setup-name').value.trim();
+            const age = Number(document.getElementById('setup-age').value);
+            const sex = document.getElementById('setup-sex').value;
+            const height = Number(document.getElementById('setup-height').value);
+            const currentWeight = Number(document.getElementById('setup-current-weight').value);
+            const goalWeight = Number(document.getElementById('setup-goal-weight').value);
+            const activityLevel = Number(document.getElementById('setup-activity').value);
+            const objective = document.getElementById('setup-objective').value;
+
+            if (!name || age < 14 || age > 100 || height < 100 || height > 250
+                || currentWeight <= 0 || goalWeight <= 0 || !activityLevel
+                || !['female', 'male'].includes(sex)
+                || !['lose', 'maintain', 'gain'].includes(objective)) {
+                showToast('Confira as informações preenchidas.', 'error');
+                return;
+            }
+
+            const restingCalories = 10 * currentWeight + 6.25 * height - 5 * age + (sex === 'male' ? 5 : -161);
+            const objectiveAdjustment = { lose: -300, maintain: 0, gain: 250 }[objective];
+            const calorieTarget = Math.round((restingCalories * activityLevel + objectiveAdjustment) / 50) * 50;
+            const profile = {
+                nome: name,
+                idade: age,
+                sexo: sex,
+                altura: height,
+                pesoAtual: currentWeight,
+                metaPeso: goalWeight,
+                metaCalorias: calorieTarget,
+                nivelAtividade: activityLevel,
+                objetivo: objective
+            };
+
+            saveAppData(STORAGE_PROFILE, JSON.stringify(profile));
+            saveAppData(STORAGE_WEIGHT_LOGS, JSON.stringify([
+                { id: 'wh_' + Date.now(), data: getTodayDateStr(), peso: currentWeight }
+            ]));
+            saveAppData(STORAGE_ONBOARDING, 'true');
+            document.getElementById('first-visit-modal').classList.add('hidden');
+            switchTab('dashboard');
+            showToast(`Configuração concluída! Meta calórica estimada: ${calorieTarget} kcal/dia.`, 'success');
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.view-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+
+            // Desktop Nav highlight
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('bg-[#ffeadb]', 'text-[#c2410c]');
+                btn.classList.add('text-[#475569]');
+            });
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if(activeNav) {
+                activeNav.classList.add('bg-[#ffeadb]', 'text-[#c2410c]');
+                activeNav.classList.remove('text-[#475569]');
+            }
+
+            // Mobile Nav highlight
+            document.querySelectorAll('.mobile-nav-item').forEach(btn => {
+                btn.classList.remove('text-[#ff914d]');
+                btn.classList.add('text-[#94a3b8]');
+            });
+            const activeMobileNav = document.getElementById(`mobile-nav-${tabId}`);
+            if(activeMobileNav) {
+                activeMobileNav.classList.add('text-[#ff914d]');
+                activeMobileNav.classList.remove('text-[#94a3b8]');
+            }
+
+            // Title update
+            const titles = {
+                dashboard: { title: 'Dashboard & Insights', sub: 'Cruzamento inteligente entre treino e alimentação em tempo real', icon: 'fa-chart-pie' },
+                workout: { title: 'Módulo de Treino', sub: 'Registo de séries, cálculo de volume e evolução', icon: 'fa-dumbbell' },
+                diet: { title: 'Módulo de Dieta', sub: 'Diário alimentar, tabela nutricional e saldo calórico', icon: 'fa-utensils' },
+                profile: { title: 'Perfil & Evolução', sub: 'Definição de metas e tendência de peso corporal', icon: 'fa-user' },
+                aicoach: { title: 'FitBot', sub: 'Consultoria de treino e nutrição em tempo real', icon: 'fa-robot' }
+            };
+            const current = titles[tabId];
+            if(current) {
+                document.getElementById('page-title').innerHTML = `<i class="fa-solid ${current.icon} text-[#ff914d]"></i> ${current.title}`;
+                document.getElementById('page-subtitle').textContent = current.sub;
+            }
+
+            // Re-render specific view data
+            if(tabId === 'dashboard') renderDashboard();
+            if(tabId === 'workout') renderWorkoutModule();
+            if(tabId === 'diet') renderDietModule();
+            if(tabId === 'profile') renderProfileModule();
+            if(tabId === 'aicoach') renderAiCoachView();
+        }
+
+        function switchWorkoutSubTab(subId) {
+            document.querySelectorAll('#view-workout .subtab-btn').forEach(btn => {
+                btn.classList.remove('text-[#ff914d]', 'border-[#ff914d]');
+                btn.classList.add('text-[#94a3b8]', 'border-transparent');
+            });
+            document.getElementById(`wtab-${subId}`).classList.add('text-[#ff914d]', 'border-[#ff914d]');
+
+            document.getElementById('wsub-log').classList.add('hidden');
+            document.getElementById('wsub-exercises').classList.add('hidden');
+            document.getElementById('wsub-progression').classList.add('hidden');
+            document.getElementById(`wsub-${subId}`).classList.remove('hidden');
+
+            if(subId === 'progression') updateExerciseProgressionChart();
+        }
+
+        function switchDietSubTab(subId) {
+            document.querySelectorAll('#view-diet .subtab-btn').forEach(btn => {
+                btn.classList.remove('text-[#ff914d]', 'border-[#ff914d]');
+                btn.classList.add('text-[#94a3b8]', 'border-transparent');
+            });
+            document.getElementById(`dtab-${subId}`).classList.add('text-[#ff914d]', 'border-[#ff914d]');
+
+            document.getElementById('dsub-meals').classList.add('hidden');
+            document.getElementById('dsub-foods').classList.add('hidden');
+            document.getElementById(`dsub-${subId}`).classList.remove('hidden');
+        }
+
+        // TOAST NOTIFICATION UTILITY
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgColors = {
+                success: 'bg-emerald-600 border-emerald-400',
+                error: 'bg-rose-600 border-rose-400',
+                info: 'bg-[#142554] border-[#ff914d]'
+            };
+
+            toast.className = `${bgColors[type]} text-white border text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-check'}"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // MODAL MANAGEMENT
+        function openQuickActionModal() {
+            document.getElementById('quick-action-modal').classList.remove('hidden');
+        }
+        function closeQuickActionModal() {
+            document.getElementById('quick-action-modal').classList.add('hidden');
+        }
+
+        function getProfile() {
+            return JSON.parse(localStorage.getItem(STORAGE_PROFILE)) || { pesoAtual: 70, metaPeso: 70, metaCalorias: 2000 };
+        }
+        function getExercises() {
+            return JSON.parse(localStorage.getItem(STORAGE_EXERCISES)) || [];
+        }
+        function getWorkoutLogs() {
+            return JSON.parse(localStorage.getItem(STORAGE_WORKOUT_LOGS)) || [];
+        }
+        function getFoods() {
+            return JSON.parse(localStorage.getItem(STORAGE_FOODS)) || [];
+        }
+        function getMealLogs() {
+            return JSON.parse(localStorage.getItem(STORAGE_MEAL_LOGS)) || [];
+        }
+        function getWeightLogs() {
+            return JSON.parse(localStorage.getItem(STORAGE_WEIGHT_LOGS)) || [];
+        }
+
+        // CALCULATE WORKOUT BURN CALORIES FOR A SPECIFIC DATE
+        function calculateWorkoutBurnForDate(dateStr) {
+            const logs = getWorkoutLogs().filter(l => l.data === dateStr);
+            const exercises = getExercises();
+            let totalBurn = 0;
+
+            logs.forEach(log => {
+                const ex = exercises.find(e => e.id === log.exercicioId);
+                if (ex) {
+                    if (ex.tipo === 'Força') {
+                        // Estimated burn: ~0.05 kcal per kg of total volume executed
+                        totalBurn += Math.round((log.volume || 0) * 0.05);
+                    } else {
+                        // Cardio burn: ~8 kcal per minute
+                        totalBurn += Math.round((log.duracao || 0) * 8);
+                    }
+                }
+            });
+
+            return totalBurn;
+        }
+
+        // CALCULATE CONSUMED CALORIES FOR A SPECIFIC DATE
+        function calculateConsumedCaloriesForDate(dateStr) {
+            const logs = getMealLogs().filter(l => l.data === dateStr);
+            const foods = getFoods();
+            let totalCal = 0;
+
+            logs.forEach(log => {
+                const food = foods.find(f => f.id === log.alimentoId);
+                if (food) {
+                    totalCal += Math.round((food.calorias100g / 100) * log.quantidade);
+                }
+            });
+
+            return totalCal;
+        }
+
+        function generateDynamicInsights() {
+            const workoutLogs = getWorkoutLogs();
+            const mealLogs = getMealLogs();
+            const weightLogs = getWeightLogs();
+            const profile = getProfile();
+            const insights = [];
+
+            // INSIGHT 1: Consumed Calories vs Non-Workout Days
+            const workoutDates = new Set(workoutLogs.map(l => l.data));
+            const mealDates = Array.from(new Set(mealLogs.map(l => l.data)));
+            
+            let highCalNonWorkoutDays = 0;
+            mealDates.forEach(d => {
+                const calories = calculateConsumedCaloriesForDate(d);
+                if (!workoutDates.has(d) && calories > profile.metaCalorias) {
+                    highCalNonWorkoutDays++;
+                }
+            });
+
+            if (highCalNonWorkoutDays > 0) {
+                insights.push({
+                    title: 'Padrão Alimentar em Dias de Descanso',
+                    text: `Identificamos que em ${highCalNonWorkoutDays} dia(s) sem treino registrado, a meta calórica foi ultrapassada. Ajustar o consumo nos dias off acelera o resultado!`,
+                    type: 'warning',
+                    icon: 'fa-triangle-exclamation'
+                });
+            } else {
+                insights.push({
+                    title: 'Consistência Dieta vs. Treino',
+                    text: 'Excelente controle! Não houve excesso calórico desnecessário nos dias de descanso.',
+                    type: 'success',
+                    icon: 'fa-circle-check'
+                });
+            }
+
+            // INSIGHT 2: Workout Volume vs Weight Evolution
+            if (weightLogs.length >= 2) {
+                const sortedWeights = [...weightLogs].sort((a, b) => new Date(a.data) - new Date(b.data));
+                const oldest = sortedWeights[0];
+                const latest = sortedWeights[sortedWeights.length - 1];
+                const weightDiff = (latest.peso - oldest.peso).toFixed(1);
+
+                // Calculate total volume in that timeframe
+                const totalVolume = workoutLogs.reduce((acc, curr) => acc + (curr.volume || 0), 0);
+
+                if (weightDiff < 0 && totalVolume > 3000) {
+                    insights.push({
+                        title: 'Efeito do Volume na Perda de Peso',
+                        text: `Com um volume acumulado de ${totalVolume.toLocaleString()} kg/min, o seu peso reduziu em ${Math.abs(weightDiff)} kg. O estresse mecânico do treino manteve a massa magra!`,
+                        type: 'info',
+                        icon: 'fa-[#050a30] fa-bolt'
+                    });
+                } else if (weightDiff > 0 && profile.metaPeso < profile.pesoAtual) {
+                    insights.push({
+                        title: 'Alerta de Meta de Peso',
+                        text: `O peso corporal subiu +${weightDiff} kg recente. Verifique se o superávit calórico diário não está compensando excessivamente o gasto do treino.`,
+                        type: 'warning',
+                        icon: 'fa-scale-unbalanced'
+                    });
+                } else {
+                    insights.push({
+                        title: 'Tendência de Peso vs Metas',
+                        text: `Sua tendência de peso está alinhada. Faltam ${(latest.peso - profile.metaPeso).toFixed(1)} kg para a meta final.`,
+                        type: 'info',
+                        icon: 'fa-chart-line'
+                    });
+                }
+            }
+
+            return insights;
+        }
+
+        function renderDashboard() {
+            const profile = getProfile();
+            const todayStr = getTodayDateStr();
+
+            // Update Sidebar Summary
+            document.getElementById('sidebar-peso-atual').textContent = `${profile.pesoAtual} kg`;
+            document.getElementById('sidebar-meta-calorica').textContent = `Meta: ${profile.metaCalorias} kcal`;
+
+            // Daily Caloric Calculations
+            const consumed = calculateConsumedCaloriesForDate(todayStr);
+            const burned = calculateWorkoutBurnForDate(todayStr);
+            const net = consumed - burned;
+            const target = profile.metaCalorias;
+            const percent = Math.min(Math.round((consumed / target) * 100), 150);
+
+            document.getElementById('dash-cal-consumed').innerHTML = `${consumed} <span class="text-xs font-normal text-[#94a3b8]">kcal</span>`;
+            document.getElementById('dash-cal-burned').innerHTML = `${burned} <span class="text-xs font-normal text-[#94a3b8]">kcal</span>`;
+            document.getElementById('dash-cal-net').innerHTML = `${net} <span class="text-xs font-normal text-[#94a3b8]">kcal</span>`;
+            document.getElementById('dash-cal-target').textContent = target;
+            document.getElementById('dash-cal-percent').textContent = `${percent}%`;
+
+            const bar = document.getElementById('dash-cal-bar');
+            bar.style.width = `${Math.min(percent, 100)}%`;
+
+            const statusEl = document.getElementById('dash-cal-status');
+            if (consumed > target) {
+                statusEl.textContent = `Excesso de ${consumed - target} kcal acima da meta diária.`;
+                statusEl.className = 'text-[11px] font-bold text-rose-400 text-right';
+            } else {
+                statusEl.textContent = `Déficit restante: ${target - consumed} kcal para atingir a meta.`;
+                statusEl.className = 'text-[11px] font-semibold text-emerald-400 text-right';
+            }
+
+            // Render Dynamic Insights Cards
+            const insightsContainer = document.getElementById('insights-container');
+            insightsContainer.innerHTML = '';
+            const insights = generateDynamicInsights();
+
+            insights.forEach(ins => {
+                const borderColors = {
+                    warning: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
+                    success: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+                    info: 'border-[#ff914d]/30 bg-[#ff914d]/10 text-[#ff914d]'
+                };
+
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-xl border ${borderColors[ins.type] || borderColors.info} space-y-1 flex gap-3 items-start`;
+                card.innerHTML = `
+                    <div class="mt-1 text-base"><i class="fa-solid ${ins.icon}"></i></div>
+                    <div>
+                        <h4 class="font-bold text-xs">${ins.title}</h4>
+                        <p class="text-[11px] text-[#94a3b8] leading-tight">${ins.text}</p>
+                    </div>
+                `;
+                insightsContainer.appendChild(card);
+            });
+
+            // Render Charts
+            renderDietSummaryChart();
+            renderWorkoutSummaryChart();
+        }
+
+        // CHART: Diet Summary (Last 7 Days)
+        function renderDietSummaryChart() {
+            const ctx = document.getElementById('chart-diet-summary').getContext('2d');
+            const profile = getProfile();
+
+            const labels = [];
+            const consumedData = [];
+            const targetData = [];
+
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                const dayLabel = d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' });
+                
+                labels.push(dayLabel);
+                consumedData.push(calculateConsumedCaloriesForDate(dateStr));
+                targetData.push(profile.metaCalorias);
+            }
+
+            if (chartDietSummaryInstance) chartDietSummaryInstance.destroy();
+
+            chartDietSummaryInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Consumidas (kcal)',
+                            data: consumedData,
+                            backgroundColor: '#ff914d',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Meta Diária',
+                            data: targetData,
+                            type: 'line',
+                            borderColor: '#22c55e',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+                        y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1d336f' } }
+                    }
+                }
+            });
+        }
+
+        // CHART: Workout Summary Total Volume
+        function renderWorkoutSummaryChart() {
+            const ctx = document.getElementById('chart-workout-summary').getContext('2d');
+            const workoutLogs = getWorkoutLogs();
+
+            const labels = [];
+            const volumeData = [];
+
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                const dayLabel = d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' });
+
+                const logs = workoutLogs.filter(l => l.data === dateStr);
+                const dayVol = logs.reduce((acc, curr) => acc + (curr.volume || 0), 0);
+
+                labels.push(dayLabel);
+                volumeData.push(dayVol);
+            }
+
+            if (chartWorkoutSummaryInstance) chartWorkoutSummaryInstance.destroy();
+
+            chartWorkoutSummaryInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Volume de Treino (kg)',
+                        data: volumeData,
+                        borderColor: '#ff914d',
+                        backgroundColor: 'rgba(255, 145, 77, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#ff914d'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+                        y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1d336f' } }
+                    }
+                }
+            });
+        }
+
+        function renderWorkoutModule() {
+            populateExerciseDropdowns();
+            renderWorkoutLogsTable();
+            renderExercisesGrid();
+            document.getElementById('wlog-date').value = getTodayDateStr();
+        }
+
+        function populateExerciseDropdowns() {
+            const exercises = getExercises();
+            const logSelect = document.getElementById('wlog-exercise');
+            const filterSelect = document.getElementById('progression-exercise-filter');
+
+            logSelect.innerHTML = '';
+            filterSelect.innerHTML = '';
+
+            exercises.forEach(ex => {
+                const opt1 = document.createElement('option');
+                opt1.value = ex.id;
+                opt1.textContent = `${ex.nome} (${ex.grupo})`;
+                logSelect.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = ex.id;
+                opt2.textContent = `${ex.nome}`;
+                filterSelect.appendChild(opt2);
+            });
+
+            if (exercises.length > 0) {
+                handleExerciseSelectChange(logSelect);
+            }
+        }
+
+        function handleExerciseSelectChange(selectEl) {
+            const exercises = getExercises();
+            const selected = exercises.find(e => e.id === selectEl.value);
+
+            const strengthSets = document.getElementById('field-strength-sets');
+            const strengthReps = document.getElementById('field-strength-reps');
+            const strengthWeight = document.getElementById('field-strength-weight');
+            const cardioDuration = document.getElementById('field-cardio-duration');
+            const cardioDistance = document.getElementById('field-cardio-distance');
+
+            if (selected && selected.tipo === 'Cardio') {
+                strengthSets.classList.add('hidden');
+                strengthReps.classList.add('hidden');
+                strengthWeight.classList.add('hidden');
+                cardioDuration.classList.remove('hidden');
+                cardioDistance.classList.remove('hidden');
+            } else {
+                strengthSets.classList.remove('hidden');
+                strengthReps.classList.remove('hidden');
+                strengthWeight.classList.remove('hidden');
+                cardioDuration.classList.add('hidden');
+                cardioDistance.classList.add('hidden');
+            }
+        }
+
+        // CALCULATE PROGRESSION STATUS (Evolução, Estagnação, Regressão) - Requirement 4.1
+        function calculateProgressionStatus(exerciseId, newVolume) {
+            const logs = getWorkoutLogs()
+                .filter(l => l.exercicioId === exerciseId)
+                .sort((a, b) => new Date(b.data) - new Date(a.data));
+
+            if (logs.length === 0) return 'Evolução'; // First session
+
+            const previousVolume = logs[0].volume || 0;
+            const diffPercent = ((newVolume - previousVolume) / previousVolume) * 100;
+
+            if (diffPercent > 2) return 'Evolução';
+            if (diffPercent < -2) return 'Regressão';
+            return 'Estagnação';
+        }
+
+        function handleWorkoutLogSubmit(e) {
+            e.preventDefault();
+            const date = document.getElementById('wlog-date').value;
+            const exerciseId = document.getElementById('wlog-exercise').value;
+
+            // Form validation (non-future date)
+            if (new Date(date) > new Date()) {
+                showToast('A data do treino não pode ser futura!', 'error');
+                return;
+            }
+
+            const exercises = getExercises();
+            const ex = exercises.find(e => e.id === exerciseId);
+            if (!ex) return;
+
+            let volume = 0;
+            let logData = {
+                id: 'wl_' + Date.now(),
+                data: date,
+                exercicioId: exerciseId
+            };
+
+            if (ex.tipo === 'Força') {
+                const sets = parseFloat(document.getElementById('wlog-sets').value);
+                const reps = parseFloat(document.getElementById('wlog-reps').value);
+                const weight = parseFloat(document.getElementById('wlog-weight').value);
+
+                if (!sets || !reps || weight === undefined || sets <= 0 || reps <= 0 || weight < 0) {
+                    showToast('Preencha valores numéricos positivos para séries, repetições e carga.', 'error');
+                    return;
+                }
+
+                volume = sets * reps * weight; // Volume = Series x Reps x Weight
+                logData = { ...logData, series: sets, reps: reps, carga: weight, volume: volume };
+            } else {
+                const duration = parseFloat(document.getElementById('wlog-duration').value);
+                const distance = parseFloat(document.getElementById('wlog-distance').value) || 0;
+
+                if (!duration || duration <= 0) {
+                    showToast('Preencha uma duração válida em minutos.', 'error');
+                    return;
+                }
+
+                volume = duration; // Cardio metric
+                logData = { ...logData, duracao: duration, distancia: distance, volume: volume };
+            }
+
+            logData.status = calculateProgressionStatus(exerciseId, volume);
+
+            const logs = getWorkoutLogs();
+            logs.push(logData);
+            saveAppData(STORAGE_WORKOUT_LOGS, JSON.stringify(logs));
+
+            showToast(`Treino registrado com sucesso! Status: ${logData.status}`, 'success');
+            renderWorkoutModule();
+            renderDashboard();
+        }
+
+        function renderWorkoutLogsTable() {
+            const tbody = document.getElementById('table-workout-logs-body');
+            tbody.innerHTML = '';
+
+            const logs = getWorkoutLogs().sort((a, b) => new Date(b.data) - new Date(a.data));
+            const exercises = getExercises();
+
+            logs.forEach(log => {
+                const ex = exercises.find(e => e.id === log.exercicioId) || { nome: 'Removido', grupo: '-' };
+                const tr = document.createElement('tr');
+
+                const statusBadges = {
+                    'Evolução': '<span class="px-2 py-0.5 text-[10px] rounded-full bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">Evolução <i class="fa-solid fa-arrow-up"></i></span>',
+                    'Estagnação': '<span class="px-2 py-0.5 text-[10px] rounded-full bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30">Estagnação <i class="fa-solid fa-minus"></i></span>',
+                    'Regressão': '<span class="px-2 py-0.5 text-[10px] rounded-full bg-rose-500/20 text-rose-400 font-bold border border-rose-500/30">Regressão <i class="fa-solid fa-arrow-down"></i></span>'
+                };
+
+                const execDetails = log.duracao 
+                    ? `${log.duracao} min ${log.distancia ? `(${log.distancia} km)` : ''}`
+                    : `${log.series}x${log.reps} @ ${log.carga}kg`;
+
+                tr.innerHTML = `
+                    <td class="p-3 text-xs text-[#94a3b8]">${log.data}</td>
+                    <td class="p-3 font-semibold text-white">${ex.nome}</td>
+                    <td class="p-3 text-xs text-[#94a3b8]">${ex.grupo}</td>
+                    <td class="p-3 font-mono text-xs">${execDetails}</td>
+                    <td class="p-3 font-bold text-[#ff914d]">${log.volume} <span class="text-[10px] font-normal text-[#94a3b8]">pts</span></td>
+                    <td class="p-3">${statusBadges[log.status] || '-'}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="deleteWorkoutLog('${log.id}')" class="text-rose-400 hover:text-rose-300 text-xs px-2 py-1">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteWorkoutLog(id) {
+            let logs = getWorkoutLogs();
+            logs = logs.filter(l => l.id !== id);
+            saveAppData(STORAGE_WORKOUT_LOGS, JSON.stringify(logs));
+            showToast('Registro de treino removido.', 'info');
+            renderWorkoutModule();
+            renderDashboard();
+        }
+
+        function handleAddExercise(e) {
+            e.preventDefault();
+            const name = document.getElementById('ex-name').value.trim();
+            const group = document.getElementById('ex-group').value;
+            const type = document.getElementById('ex-type').value;
+
+            if (!name) return;
+
+            const exercises = getExercises();
+            exercises.push({ id: 'ex_' + Date.now(), nome: name, grupo: group, tipo: type });
+            saveAppData(STORAGE_EXERCISES, JSON.stringify(exercises));
+
+            document.getElementById('form-add-exercise').reset();
+            showToast('Exercício cadastrado com sucesso!', 'success');
+            renderWorkoutModule();
+        }
+
+        function renderExercisesGrid() {
+            const grid = document.getElementById('exercise-list-grid');
+            grid.innerHTML = '';
+            const exercises = getExercises();
+
+            exercises.forEach(ex => {
+                const card = document.createElement('div');
+                card.className = 'p-3 bg-[#142554] border border-[#1d336f] rounded-xl flex justify-between items-center';
+                card.innerHTML = `
+                    <div>
+                        <p class="font-bold text-sm text-white">${ex.nome}</p>
+                        <p class="text-xs text-[#94a3b8]">${ex.grupo} • <span class="text-[#ff914d]">${ex.tipo}</span></p>
+                    </div>
+                    <button onclick="deleteExercise('${ex.id}')" class="text-rose-400 hover:text-rose-300 text-xs p-2">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function deleteExercise(id) {
+            let exercises = getExercises();
+            exercises = exercises.filter(e => e.id !== id);
+            saveAppData(STORAGE_EXERCISES, JSON.stringify(exercises));
+            showToast('Exercício removido.', 'info');
+            renderWorkoutModule();
+        }
+
+        // CHART: Individual Exercise Progression
+        function updateExerciseProgressionChart() {
+            const exerciseId = document.getElementById('progression-exercise-filter').value;
+            const exercises = getExercises();
+            const ex = exercises.find(e => e.id === exerciseId);
+            if (!ex) return;
+
+            const logs = getWorkoutLogs()
+                .filter(l => l.exercicioId === exerciseId)
+                .sort((a, b) => new Date(a.data) - new Date(b.data));
+
+            const banner = document.getElementById('progression-status-banner');
+            if (logs.length > 0) {
+                const lastStatus = logs[logs.length - 1].status;
+                const statusStyles = {
+                    'Evolução': 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300',
+                    'Estagnação': 'bg-amber-500/10 border-amber-500/30 text-amber-300',
+                    'Regressão': 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+                };
+                banner.className = `p-4 rounded-xl border mb-4 flex items-center gap-3 ${statusStyles[lastStatus] || ''}`;
+                banner.innerHTML = `
+                    <div class="text-2xl font-bold"><i class="fa-solid fa-chart-line"></i></div>
+                    <div>
+                        <p class="font-bold text-sm">Status Atual: ${lastStatus}</p>
+                        <p class="text-xs text-[#94a3b8]">Com base nos últimos registros de volume executados em ${ex.nome}.</p>
+                    </div>
+                `;
+            } else {
+                banner.className = 'p-4 rounded-xl border border-[#1d336f] bg-[#142554] text-[#94a3b8]';
+                banner.innerHTML = '<p class="text-xs">Nenhum registro de execução encontrado para este exercício.</p>';
+            }
+
+            const ctx = document.getElementById('chart-exercise-progression').getContext('2d');
+            const labels = logs.map(l => l.data);
+            const volumeData = logs.map(l => l.volume);
+
+            if (chartExerciseProgressionInstance) chartExerciseProgressionInstance.destroy();
+
+            chartExerciseProgressionInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Volume (${ex.nome})`,
+                        data: volumeData,
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        fill: true,
+                        tension: 0.2,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#22c55e'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8' } } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: '#1d336f' } }
+                    }
+                }
+            });
+        }
+
+        function renderDietModule() {
+            if (!document.getElementById('diet-diary-date').value) {
+                document.getElementById('diet-diary-date').value = getTodayDateStr();
+            }
+            populateFoodDropdown();
+            renderDietDiary();
+            renderFoodDatabaseTable();
+        }
+
+        function populateFoodDropdown() {
+            const foods = getFoods();
+            const select = document.getElementById('dlog-food');
+            select.innerHTML = '';
+
+            foods.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f.id;
+                opt.textContent = `${f.nome} (${f.calorias100g} kcal / 100g)`;
+                select.appendChild(opt);
+            });
+        }
+
+        function handleDietLogSubmit(e) {
+            e.preventDefault();
+            const dateStr = document.getElementById('diet-diary-date').value;
+            const mealType = document.getElementById('dlog-meal-type').value;
+            const foodId = document.getElementById('dlog-food').value;
+            const qty = parseFloat(document.getElementById('dlog-qty').value);
+
+            if (!qty || qty <= 0) {
+                showToast('Informe uma quantidade positiva consumida.', 'error');
+                return;
+            }
+
+            const mealLogs = getMealLogs();
+            mealLogs.push({
+                id: 'ml_' + Date.now(),
+                data: dateStr,
+                refeicao: mealType,
+                alimentoId: foodId,
+                quantidade: qty
+            });
+
+            saveAppData(STORAGE_MEAL_LOGS, JSON.stringify(mealLogs));
+            showToast('Alimento adicionado à refeição!', 'success');
+            renderDietDiary();
+            renderDashboard();
+        }
+
+        function renderDietDiary() {
+            const dateStr = document.getElementById('diet-diary-date').value;
+            const mealLogs = getMealLogs().filter(l => l.data === dateStr);
+            const foods = getFoods();
+
+            const mealsCategories = ['Café da Manhã', 'Almoço', 'Lanche / Pré-Treino', 'Jantar', 'Ceia'];
+            const container = document.getElementById('diet-meals-container');
+            container.innerHTML = '';
+
+            let totalProt = 0, totalCarb = 0, totalGord = 0;
+
+            mealsCategories.forEach(mealCat => {
+                const logsForCat = mealLogs.filter(l => l.refeicao === mealCat || (mealCat === 'Lanche / Pré-Treino' && l.refeicao === 'Lanche'));
+
+                const block = document.createElement('div');
+                block.className = 'bg-[#0e1c42] border border-[#1d336f] rounded-2xl p-4 shadow-xl';
+
+                let rowsHtml = '';
+                let mealCal = 0;
+
+                logsForCat.forEach(log => {
+                    const food = foods.find(f => f.id === log.alimentoId) || { nome: 'Removido', calorias100g: 0, prot: 0, carb: 0, gord: 0 };
+                    const factor = log.quantidade / 100;
+                    const cals = Math.round(food.calorias100g * factor);
+                    mealCal += cals;
+
+                    totalProt += (food.prot || 0) * factor;
+                    totalCarb += (food.carb || 0) * factor;
+                    totalGord += (food.gord || 0) * factor;
+
+                    rowsHtml += `
+                        <div class="flex justify-between items-center text-xs py-2 border-b border-[#1d336f]/50">
+                            <div>
+                                <span class="font-bold text-white">${food.nome}</span>
+                                <span class="text-[#94a3b8] ml-2">(${log.quantidade}g)</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="font-mono text-[#ff914d] font-bold">${cals} kcal</span>
+                                <button onclick="deleteMealLog('${log.id}')" class="text-rose-400 hover:text-rose-300">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                block.innerHTML = `
+                    <div class="flex justify-between items-center mb-2 pb-2 border-b border-[#1d336f]">
+                        <h4 class="font-bold text-sm text-white flex items-center gap-2">
+                            <i class="fa-solid fa-utensils text-[#ff914d]"></i> ${mealCat}
+                        </h4>
+                        <span class="text-xs font-bold text-[#ff914d] bg-[#142554] px-2.5 py-1 rounded-full border border-[#1d336f]">${mealCal} kcal</span>
+                    </div>
+                    <div class="space-y-1">
+                        ${rowsHtml || '<p class="text-xs text-[#94a3b8] italic py-2">Nenhum alimento registrado nesta refeição.</p>'}
+                    </div>
+                `;
+                container.appendChild(block);
+            });
+
+            // Update Macros Summary Bar
+            document.getElementById('macro-prot').textContent = `${Math.round(totalProt)}g`;
+            document.getElementById('macro-carb').textContent = `${Math.round(totalCarb)}g`;
+            document.getElementById('macro-gord').textContent = `${Math.round(totalGord)}g`;
+        }
+
+        function deleteMealLog(id) {
+            let logs = getMealLogs();
+            logs = logs.filter(l => l.id !== id);
+            saveAppData(STORAGE_MEAL_LOGS, JSON.stringify(logs));
+            showToast('Alimento removido da refeição.', 'info');
+            renderDietDiary();
+            renderDashboard();
+        }
+
+        function handleAddFood(e) {
+            e.preventDefault();
+            const name = document.getElementById('food-name').value.trim();
+            const cals = parseFloat(document.getElementById('food-cals').value);
+            const prot = parseFloat(document.getElementById('food-prot').value) || 0;
+            const carb = parseFloat(document.getElementById('food-carb').value) || 0;
+            const gord = parseFloat(document.getElementById('food-gord').value) || 0;
+
+            if (!name || cals < 0) {
+                showToast('Informe um nome e calorias válidos.', 'error');
+                return;
+            }
+
+            const foods = getFoods();
+            foods.push({
+                id: 'fd_' + Date.now(),
+                nome: name,
+                calorias100g: cals,
+                prot: prot,
+                carb: carb,
+                gord: gord
+            });
+
+            saveAppData(STORAGE_FOODS, JSON.stringify(foods));
+            document.getElementById('form-add-food').reset();
+            showToast('Alimento cadastrado com sucesso!', 'success');
+            renderDietModule();
+        }
+
+        function renderFoodDatabaseTable() {
+            const tbody = document.getElementById('table-food-db-body');
+            tbody.innerHTML = '';
+            const foods = getFoods();
+
+            foods.forEach(f => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-white">${f.nome}</td>
+                    <td class="p-3 font-mono font-bold text-[#ff914d]">${f.calorias100g} kcal</td>
+                    <td class="p-3 text-emerald-400 font-mono">${f.prot}g</td>
+                    <td class="p-3 text-sky-400 font-mono">${f.carb}g</td>
+                    <td class="p-3 text-amber-400 font-mono">${f.gord}g</td>
+                    <td class="p-3 text-right">
+                        <button onclick="deleteFood('${f.id}')" class="text-rose-400 hover:text-rose-300 text-xs p-1">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteFood(id) {
+            let foods = getFoods();
+            foods = foods.filter(f => f.id !== id);
+            saveAppData(STORAGE_FOODS, JSON.stringify(foods));
+            showToast('Alimento removido da base.', 'info');
+            renderDietModule();
+        }
+
+        function renderProfileModule() {
+            const profile = getProfile();
+            document.getElementById('prof-current-weight').value = profile.pesoAtual;
+            document.getElementById('prof-goal-weight').value = profile.metaPeso;
+            document.getElementById('prof-cal-target').value = profile.metaCalorias;
+            document.getElementById('wrec-date').value = getTodayDateStr();
+
+            renderWeightHistoryTable();
+            renderWeightTrendChart();
+        }
+
+        function handleProfileSubmit(e) {
+            e.preventDefault();
+            const currentW = parseFloat(document.getElementById('prof-current-weight').value);
+            const goalW = parseFloat(document.getElementById('prof-goal-weight').value);
+            const calTarget = parseFloat(document.getElementById('prof-cal-target').value);
+
+            if (currentW <= 0 || goalW <= 0 || calTarget <= 0) {
+                showToast('Todos os valores devem ser números positivos!', 'error');
+                return;
+            }
+
+            const updatedProfile = { ...getProfile(), pesoAtual: currentW, metaPeso: goalW, metaCalorias: calTarget };
+            saveAppData(STORAGE_PROFILE, JSON.stringify(updatedProfile));
+
+            showToast('Metas e perfil salvos com sucesso!', 'success');
+            renderProfileModule();
+            renderDashboard();
+        }
+
+        function handleAddWeight(e) {
+            e.preventDefault();
+            const dateStr = document.getElementById('wrec-date').value;
+            const weightVal = parseFloat(document.getElementById('wrec-val').value);
+
+            if (new Date(dateStr) > new Date()) {
+                showToast('A data da medição não pode ser futura!', 'error');
+                return;
+            }
+            if (!weightVal || weightVal <= 0) {
+                showToast('Informe um valor de peso válido e positivo.', 'error');
+                return;
+            }
+
+            const weights = getWeightLogs();
+            weights.push({ id: 'wh_' + Date.now(), data: dateStr, peso: weightVal });
+            saveAppData(STORAGE_WEIGHT_LOGS, JSON.stringify(weights));
+
+            // Also update current weight in profile
+            const profile = getProfile();
+            profile.pesoAtual = weightVal;
+            saveAppData(STORAGE_PROFILE, JSON.stringify(profile));
+
+            showToast('Peso corporal registrado!', 'success');
+            renderProfileModule();
+            renderDashboard();
+        }
+
+        function renderWeightHistoryTable() {
+            const tbody = document.getElementById('table-weight-history');
+            tbody.innerHTML = '';
+            const weights = getWeightLogs().sort((a, b) => new Date(b.data) - new Date(a.data));
+            const profile = getProfile();
+
+            weights.forEach(w => {
+                const diff = (w.peso - profile.metaPeso).toFixed(1);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2 text-[#94a3b8]">${w.data}</td>
+                    <td class="p-2 font-bold text-white">${w.peso} kg</td>
+                    <td class="p-2 font-mono ${diff > 0 ? 'text-amber-400' : 'text-emerald-400'}">${diff > 0 ? `+${diff}` : diff} kg</td>
+                    <td class="p-2 text-right">
+                        <button onclick="deleteWeightLog('${w.id}')" class="text-rose-400 hover:text-rose-300">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteWeightLog(id) {
+            let weights = getWeightLogs();
+            weights = weights.filter(w => w.id !== id);
+            saveAppData(STORAGE_WEIGHT_LOGS, JSON.stringify(weights));
+            showToast('Medição de peso removida.', 'info');
+            renderProfileModule();
+        }
+
+        // CHART: Weight Evolution vs Goal
+        function renderWeightTrendChart() {
+            const ctx = document.getElementById('chart-weight-trend').getContext('2d');
+            const weights = getWeightLogs().sort((a, b) => new Date(a.data) - new Date(b.data));
+            const profile = getProfile();
+
+            const labels = weights.map(w => w.data);
+            const weightData = weights.map(w => w.peso);
+            const goalData = weights.map(() => profile.metaPeso);
+
+            if (chartWeightTrendInstance) chartWeightTrendInstance.destroy();
+
+            chartWeightTrendInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Peso Registrado (kg)',
+                            data: weightData,
+                            borderColor: '#ff914d',
+                            backgroundColor: 'rgba(255, 145, 77, 0.2)',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 6,
+                            pointBackgroundColor: '#ff914d'
+                        },
+                        {
+                            label: 'Meta de Peso',
+                            data: goalData,
+                            borderColor: '#22c55e',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8' } } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: '#1d336f' } }
+                    }
+                }
+            });
+        }
+
+        function renderAiCoachView() {
+            const chatContainer = document.getElementById('ai-chat-messages');
+            if (chatContainer.children.length === 0) {
+                appendAiMessage('Olá! Sou o **FitBot**. Li os seus dados atuais de treino e alimentação no sistema. Como posso te ajudar a atingir a sua meta hoje?');
+            }
+        }
+
+        function appendUserMessage(msg) {
+            const container = document.getElementById('ai-chat-messages');
+            const div = document.createElement('div');
+            div.className = 'flex justify-end';
+            div.innerHTML = `
+                <div class="bg-[#ff914d] text-white text-xs px-4 py-2.5 rounded-2xl max-w-[80%] font-medium shadow-md">
+                    ${msg}
+                </div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function appendAiMessage(msg) {
+            const container = document.getElementById('ai-chat-messages');
+            const div = document.createElement('div');
+            div.className = 'flex justify-start items-start gap-2.5';
+            div.innerHTML = `
+                <div class="w-7 h-7 rounded-lg gradient-accent flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="bg-[#142554] border border-[#1d336f] text-white text-xs px-4 py-3 rounded-2xl max-w-[85%] leading-relaxed shadow-md">
+                    ${msg.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}
+                </div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function handleAiChatSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('ai-user-input');
+            const query = input.value.trim();
+            if (!query) return;
+
+            appendUserMessage(query);
+            input.value = '';
+
+            setTimeout(() => {
+                generateAiResponseForQuery(query);
+            }, 600);
+        }
+
+        function triggerAiAction(actionType) {
+            const profile = getProfile();
+            const todayStr = getTodayDateStr();
+            const consumed = calculateConsumedCaloriesForDate(todayStr);
+            const burned = calculateWorkoutBurnForDate(todayStr);
+
+            if (actionType === 'workout_suggestion') {
+                appendUserMessage('⚡ Quero uma sugestão de treino para hoje!');
+                setTimeout(() => {
+                    if (consumed < profile.metaCalorias * 0.4) {
+                        appendAiMessage(`Notei que consumiu apenas **${consumed} kcal** hoje. Para evitar perda de rendimento, sugiro um treino moderado de **Hipertrofia de Pernas & Core** com menor volume de cardio.`);
+                    } else {
+                        appendAiMessage(`Com o seu saldo energético atual de **${consumed} kcal**, está com estoque de glicogênio excelente! Recomendação: **Treino Intenso de Peito e Tríceps** (4x Supino Reto focando em progressão de carga).`);
+                    }
+                }, 600);
+            } else if (actionType === 'stagnation_advice') {
+                appendUserMessage('📈 Como posso superar a estagnação nos meus exercícios?');
+                setTimeout(() => {
+                    const workoutLogs = getWorkoutLogs();
+                    const stagnated = workoutLogs.filter(l => l.status === 'Estagnação');
+                    if (stagnated.length > 0) {
+                        appendAiMessage(`Analisando seu histórico, você possui **${stagnated.length} exercício(s)** estagnado(s). **Dica da IA:** Aplique a técnica de *Deload* (reduza 10% da carga por 1 semana) ou aumente a ingestão de carboidratos nas 2 horas pré-treino.`);
+                    } else {
+                        appendAiMessage('Seus exercícios estão em plena evolução! Mantenha a sobrecarga progressiva aumentando 1-2kg por semana.');
+                    }
+                }, 600);
+            } else if (actionType === 'diet_adjustment') {
+                appendUserMessage('🥗 Como devo ajustar minha dieta para o resto do dia?');
+                setTimeout(() => {
+                    const remaining = profile.metaCalorias - (consumed - burned);
+                    if (remaining > 0) {
+                        appendAiMessage(`Ainda restam **${remaining} kcal** para atingir sua meta diária de **${profile.metaCalorias} kcal**. Sugestão de Refeição: 150g de Peito de Frango + 150g de Arroz Integral.`);
+                    } else {
+                        appendAiMessage(`Você atingiu/ultrapassou sua meta diária em **${Math.abs(remaining)} kcal**. Para a ceia, priorize fontes puras de proteína magra como clara de ovo ou Whey com água.`);
+                    }
+                }, 600);
+            } else if (actionType === 'full_analysis') {
+                appendUserMessage('🔍 Faça uma análise geral cruzada dos meus dados.');
+                setTimeout(() => {
+                    appendAiMessage(`**Diagnóstico Completo HACKTOON:**\n• **Peso:** ${profile.pesoAtual} kg (Meta: ${profile.metaPeso} kg).\n• **Balanço Hoje:** Consumiu ${consumed} kcal e queimou ${burned} kcal em treino.\n• **Status Treino:** Seu volume semanal acumulado demonstra alta constância!`);
+                }, 600);
+            }
+        }
+
+        function generateAiResponseForQuery(query) {
+            const q = query.toLowerCase();
+            const profile = getProfile();
+
+            if (q.includes('peso') || q.includes('emagrecer') || q.includes('meta')) {
+                appendAiMessage(`Para atingir sua meta de **${profile.metaPeso} kg** (atual: ${profile.pesoAtual} kg), mantenha o déficit diário com a meta de **${profile.metaCalorias} kcal** e garanta pelo menos 3 treinos de força por semana.`);
+            } else if (q.includes('treino') || q.includes('exercicio') || q.includes('série')) {
+                appendAiMessage('Sua rotina de treinos está sendo monitorada pelo volume (Séries × Reps × Carga). Se sentir fadiga alta, aumente o tempo de descanso entre as séries para 2 minutos.');
+            } else {
+                appendAiMessage('Entendido! Lembre-se que o maior segredo da plataforma HACKTOON é manter o equilíbrio: o treino gera o estresse de estímulo e a nutrição entrega os blocos de construção muscular.');
+            }
+        }
+
+        window.onload = function() {
+            initializeMockDataIfEmpty();
+            if (!startFirstVisitSetup()) switchTab('dashboard');
+        };
+    </script>
+</body>
+</html>
