@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b1020">
+    <title>Gerador de Senhas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main class="page">
+        <section class="generator" aria-labelledby="titulo">
+            <h1 id="titulo">Gerador de Senhas</h1>
+
+
+            <div class="length-control">
+                <label for="tamanho">Tamanho da senha:</label>
+                <div class="number-wrap">
+                    <input type="number" id="tamanho" value="8" min="4" max="32"
+                        aria-label="Tamanho da senha, de 4 a 32 caracteres">
+                    <span>caracteres</span>
+                </div>
+            </div>
+
+            <fieldset class="options">
+                <legend>Caracteres:</legend>
+                <label class="option">
+                    <input type="checkbox" id="maiusculas" checked>
+                    <span class="checkmark" aria-hidden="true"></span>
+                    <span class="option-copy"><strong>Maiúsculas</strong><small>A–Z</small></span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" id="minusculas" checked>
+                    <span class="checkmark" aria-hidden="true"></span>
+                    <span class="option-copy"><strong>Minúsculas</strong><small>a–z</small></span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" id="numeros" checked>
+                    <span class="checkmark" aria-hidden="true"></span>
+                    <span class="option-copy"><strong>Números</strong><small>0–9</small></span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" id="simbolos" checked>
+                    <span class="checkmark" aria-hidden="true"></span>
+                    <span class="option-copy"><strong>Símbolos</strong><small>! @ # $ %</small></span>
+                </label>
+            </fieldset>
+
+            <button class="generate-button" id="gerar" type="button">
+                Gerar senha
+            </button>
+
+            <div class="result-area">
+                <label for="resultado">Sua senha:</label>
+                <div class="password-output">
+                    <p id="resultado" aria-live="polite" aria-atomic="true"></p>
+                    <button class="copy-button" id="copiar" type="button" aria-label="Copiar senha">Copiar</button>
+                </div>
+            </div>
+
+
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+
+</html>
